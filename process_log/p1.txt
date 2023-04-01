@@ -1,0 +1,29 @@
+.TH PROJECT 1
+.SH NAME
+get_proc_log() \- syscall 435, retrieves process log level
+
+set_proc_log(int level) \- syscall 436, sets process log level
+
+proc_message(char* msg, int level) \- syscall 437, logs given message at specified level
+.SH SYNOPSIS
+The syscalls were specified in the syscall table in "/usr/rep/src/reptilian-kernel/arch/x86/entry/syscalls/syscall_64.tbl". This where they were associated with their given numbers.
+
+They were defined as prototypes in "/usr/rep/src/reptilian-kernel/include/linux/syscalls.h" and implemented in "/usr/rep/src/reptilian-kernel/kernel/sys.c".
+.SH DESCRIPTION
+The system call numbers needed to be set to the new system calls I was going to create, so I edited "/usr/rep/src/reptilian-kernel/arch/x86/entry/syscalls/syscall_64.tbl. In the file there were two tables, one for 64-bit system calls and the other for 32 bit system calls. Since we were using x86-64 processors, I added the system call information to the 64-bit table.
+
+I added the system call prototypes to "/usr/rep/src/reptilian-kernel/include/linux/syscalls.h", where I was able to specify syscall arguments, argument types, and return type. While syscall 435 did not need any arguments, syscall 436 needed to take in an integer to set the log level, and syscall 437 needed a char* and an integer to log a message at a specified log level.
+
+I implemented the system calls in "/usr/rep/src/reptilian-kernel/kernel/sys.c".
+
+For syscall 435, I returned the process log level.
+
+For syscall 436, I checked if the calling process's effective user ID was equal to 0, indicating superuser permissions. If so, the process log level attribute was reassigned to the passed in integer. This check ensured that only processes running as the superuser could change the process log level attribute. I also checked that the passed in value was a valid log level. If the process log level attribute was reassigned, the syscall returned the passed in integer. Otherwise, it returned -1.
+
+For syscall 437, I checked if the passed in integer was valid. If not, the syscall immediately returned -1. Otherwise, the program continued, first checking if the log level attribute was greater than or equal to the passed in integer. If so, the executable name, process ID and passed in message were logged at the corresponding console log level, and the level was returned. Otherwise, the syscall returned -1.
+.SH TESTING
+The system calls were tested by programs that called the syscalls with varying parameters to ensure they handled both valid and invalid arguments. Syscall 436 and syscall 437 were tested with both valid and invalid process log levels. Syscall 436 was also tested with both processes running as a normal user and superuser. Syscall 437 was also tested with levels both lower and higher than the current process log level.
+
+The system calls were also tested with the library code written for the assignment and test cases provided by the professor. The results attained from these tests were satisfactory. There are no known bugs.
+.SH SCREENCAST
+https://youtu.be/a2zBGfe60es

@@ -1,0 +1,39 @@
+.TH PROJECT 3
+.SH FILES
+WadNode.h and WadNode.cpp were added to libWad to create node variables to store file system data.
+
+Wad.h and Wad.cpp were added to libWad to read and store file system data as a n-ary tree.
+
+wadfs.cpp was added to wadfs to define how FUSE should handle various file operations and to have FUSE mount a file system at a specified path.
+
+.SH LIBWAD IMPLEMENTATION
+loadWad was implemented by using POSIX calls to read the wad file and store the wad file header, loop through the file and read descriptor data. Data from descriptors was represented as a tree of WadNode* variables. A Wad*, which has access to all the WadNode*, is returned.
+
+getMagic returns the variable assigned to the wad file magic in the loadWad function.
+
+isContent uses a function to retrieve the WadNode* corresponding to the specified path, and then returns a bool initialized when the WadNode* was created if it corresponded to a file.
+
+isDirectory performs the same process as isContent but returns its negation.
+
+getSize uses a function to retrieve the WadNode* corresponding to the specified path and returned its 'length' member variable.
+
+getContents uses a function to retrieve the WadNode* corresponding to the specified path, and writes the specified amount of bytes from its 'content' member variable (starting from the specified offset) to the specified buffer.
+
+getDirectory uses a function to retrieve the WadNode* according to the specified path and adds the name member variable of each WadNode* in the vector<WadNode*> representing the files within the directory to the passed in vector.
+
+.SH FUSE Implementation
+The wadfs program first uses loadWad() to return a Wad* which is used by the other functions to obtain file data, and then runs fuse_main, having fuse create the daemon to mount the file system and perform operations.
+
+getattr is called before other operations and specifies path details. If a path is a directory the corresponding file is marked as a directory and given read-and-execute permissions. Otherwise, it is marked as a file and given read-only permissions.
+
+open, release, and releasedir returned 0 as dealing with a file in the file system dealt with libWad functionality and release and releasedir were unneeded.
+
+read used getContents with the specified path to copy the desired bytes into the specified buffer.
+
+readdir used getDirectory to store the names of files in a directory in a vector<string>*; each element in the vector was passed into filler() to set up directory contents.
+
+destroy deallocated dynamic memory when the filesystem was unmounted.
+.SH TESTING
+Testing was performed with the provided wad_dump.cpp, with provided .wad files. Specialized test cases were also written in order to test libWad other functionality, such as getContents. Valgrind was used to check for memory leaks with libWad functionality. wadfs functionality was tested by mounting a file system based on provided wad files. The mounted file system's permissions were checked, and the contents of the file system were read. There are no known bugs.
+.SH SCREENCAST
+https://youtu.be/hskyZvnnFDc

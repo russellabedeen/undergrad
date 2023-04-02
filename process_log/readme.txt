@@ -1,1 +1,1 @@
-This project was part of a course on operating systems that involved creating custom system calls.
+This project was part of a course on operating systems that involved creating custom system calls. These calls were created and implemented on ReptilianOS, which is modeled after Android and Ubuntu systems (https://www.cise.ufl.edu/research/reptilian/wiki/doku.php).
